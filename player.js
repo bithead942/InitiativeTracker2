@@ -1,32 +1,9 @@
-const conditions = [
-  'Normal',
-  'Blinded',
-  'Charmed',
-  'Dead',
-  'Deafened',
-  'Frightened',
-  'Grappled',
-  'Incapacitated',
-  'Invisible',
-  'Paralyzed',
-  'Petrified',
-  'Poisoned',
-  'Prone',
-  'Restrained',
-  'Stunned',
-  'Unconscious'
-];
-
 let state = {
   characters: [],
   activeIndex: 0
 };
 
 const listEl = document.getElementById('list');
-
-function conditionOptions(selected) {
-  return conditions.map(c => `<option value="${c}"${c === selected ? ' selected' : ''}>${c}</option>`).join('');
-}
 
 function isDead(char) {
   return char.condition1 === 'Dead' || char.condition2 === 'Dead';
@@ -46,30 +23,30 @@ function scrollToActive() {
   }
 }
 
+function conditionText(char) {
+  const parts = [char.condition1];
+  if (char.condition2 && char.condition2 !== 'Normal') {
+    parts.push(char.condition2);
+  }
+  return parts.join(', ');
+}
+
 function render() {
   listEl.innerHTML = '';
   state.characters.forEach((char, index) => {
     const isActive = index === state.activeIndex;
-    const showCondition2 = char.condition1 !== 'Normal';
     const dead = isDead(char);
     const row = document.createElement('div');
     row.className = `row ${isActive ? 'active' : ''} ${dead ? 'dead' : ''}`;
-    row.dataset.index = index;
 
     row.innerHTML = `
       <div class="row-header">
         <span class="turn-num">${index + 1}</span>
-        <div class="name-wrap">
-          <input type="text" class="name" value="${escapeHtml(char.name)}" readonly data-field="name">
-        </div>
+        <span class="name-label">${escapeHtml(char.name)}</span>
       </div>
       <div class="stat-row">
-        <label class="control-label">Init: <input type="number" class="init" value="${char.init}" readonly data-field="init"></label>
-      </div>
-      <div class="condition-row">
-        <label class="control-label condition-label">Condition:</label>
-        <select class="condition1" data-field="condition1" disabled>${conditionOptions(char.condition1)}</select>
-        ${showCondition2 ? `<select class="condition2" data-field="condition2" disabled>${conditionOptions(char.condition2)}</select>` : ''}
+        <span class="stat-label">Init: <span class="stat-value">${char.init}</span></span>
+        <span class="stat-label condition-label">Condition: <span class="condition-value">${conditionText(char)}</span></span>
       </div>
     `;
     listEl.appendChild(row);

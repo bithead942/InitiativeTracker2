@@ -6,7 +6,7 @@ const dataFile = path.join(app.getPath('userData'), 'initiative-data.json');
 const windows = [];
 let closingAll = false;
 
-function createWindow(file = 'index.html') {
+function createWindow(file = 'index.html', isPlayer = false) {
   Menu.setApplicationMenu(null);
 
   const win = new BrowserWindow({
@@ -15,7 +15,7 @@ function createWindow(file = 'index.html') {
     title: 'D&D Initiative Tracker 2.0',
     minimizable: false,
     maximizable: false,
-    resizable: false,
+    resizable: isPlayer,
     useContentSize: true,
     icon: path.join(__dirname, 'assets', 'app-icon.ico'),
     webPreferences: {
@@ -69,8 +69,12 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
-    createWindow('index.html');
-    createWindow('player.html');
+    const playerWin = createWindow('player.html', true);
+    playerWin.maximize();
+
+    const dmWin = createWindow('index.html', false);
+    dmWin.center();
+    dmWin.focus();
   });
 
   app.on('window-all-closed', () => {
@@ -79,8 +83,11 @@ if (!gotTheLock) {
 
   app.on('activate', () => {
     if (windows.length === 0) {
-      createWindow('index.html');
-      createWindow('player.html');
+      const playerWin = createWindow('player.html', true);
+      playerWin.maximize();
+      const dmWin = createWindow('index.html', false);
+      dmWin.center();
+      dmWin.focus();
     }
   });
 
