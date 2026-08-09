@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const dataFile = path.join(app.getPath('userData'), 'initiative-data.json');
 const windows = [];
+let closingAll = false;
 
 function createWindow(file = 'index.html') {
   Menu.setApplicationMenu(null);
@@ -25,6 +26,13 @@ function createWindow(file = 'index.html') {
   });
 
   win.loadFile(file);
+  win.on('close', () => {
+    if (closingAll) return;
+    closingAll = true;
+    windows.forEach(w => {
+      if (w !== win && !w.isDestroyed()) w.close();
+    });
+  });
   win.on('closed', () => {
     const idx = windows.indexOf(win);
     if (idx > -1) windows.splice(idx, 1);
