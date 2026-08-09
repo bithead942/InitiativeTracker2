@@ -3,6 +3,10 @@
 body.player {
   font-size: 3vh;
   overflow: hidden;
+  background-image: url('img/player-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .player .app {
@@ -23,15 +27,15 @@ body.player {
   border: 0.5vh solid #4a6bda;
   border-radius: 2vh;
   padding: 2vh;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .player .row.active {
-  background: #ff0;
+  background: rgba(255, 255, 0, 0.5);
 }
 
 .player .row.dead {
-  background: #a0a0a0;
+  background: rgba(160, 160, 160, 0.5);
 }
 
 .player .row-header {
