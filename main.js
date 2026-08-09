@@ -22,12 +22,12 @@ function createWindow(isPlayer = false) {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      additionalArguments: isPlayer ? ['--player-view'] : []
     }
   });
 
-  const loadOptions = isPlayer ? { query: { 'player': '1' } } : {};
-  win.loadFile('index.html', loadOptions);
+  win.loadFile('index.html');
   win.on('closed', () => {
     const idx = windows.indexOf(win);
     if (idx > -1) windows.splice(idx, 1);

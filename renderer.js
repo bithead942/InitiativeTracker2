@@ -17,7 +17,7 @@ const conditions = [
   'Unconscious'
 ];
 
-const isPlayer = new URLSearchParams(window.location.search).get('player') === '1';
+const isPlayer = window.api.isPlayer;
 let isDM = !isPlayer;
 
 let state = {
