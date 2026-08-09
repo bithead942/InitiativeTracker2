@@ -55,11 +55,19 @@ function render() {
   scrollToActive();
 }
 
-(async function init() {
+async function loadState() {
   const saved = await window.api.loadData();
   if (saved) {
     state.characters = saved.characters || [];
     state.activeIndex = typeof saved.activeIndex === 'number' ? saved.activeIndex : 0;
   }
   render();
+}
+
+(function init() {
+  loadState();
+
+  window.api.onDataChange(() => {
+    loadState();
+  });
 })();

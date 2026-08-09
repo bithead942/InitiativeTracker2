@@ -50,12 +50,19 @@ function loadData() {
   }
 }
 
-function saveData(data) {
+function saveData(data, sender) {
   try {
     fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+    broadcast('data-changed', sender);
   } catch (err) {
     console.error('Save failed:', err);
   }
+}
+
+function broadcast(channel, sender) {
+  windows.forEach(w => {
+    if (w && !w.isDestroyed() && w.webContents !== sender) w.webContents.send(channel);
+  });
 }
 
 const gotTheLock = app.requestSingleInstanceLock();
@@ -93,7 +100,7 @@ if (!gotTheLock) {
 
   ipcMain.handle('load-data', loadData);
   ipcMain.handle('save-data', (event, data) => {
-    saveData(data);
+    saveData(data, event.sender);
     return true;
   });
 }
