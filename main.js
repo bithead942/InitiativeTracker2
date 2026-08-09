@@ -65,6 +65,19 @@ function broadcast(channel, sender) {
   });
 }
 
+function keepMaximized(win) {
+  let maximizeTimer = null;
+  win.on('moved', () => {
+    clearTimeout(maximizeTimer);
+    maximizeTimer = setTimeout(() => {
+      if (win.isDestroyed()) return;
+      if (!win.isMaximized() && !win.isMinimized() && !win.isFullScreen()) {
+        win.maximize();
+      }
+    }, 100);
+  });
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -78,6 +91,7 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     const playerWin = createWindow('player.html', true);
     playerWin.maximize();
+    keepMaximized(playerWin);
 
     const dmWin = createWindow('index.html', false);
     dmWin.center();
@@ -92,6 +106,7 @@ if (!gotTheLock) {
     if (windows.length === 0) {
       const playerWin = createWindow('player.html', true);
       playerWin.maximize();
+      keepMaximized(playerWin);
       const dmWin = createWindow('index.html', false);
       dmWin.center();
       dmWin.focus();
