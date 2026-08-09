@@ -18,9 +18,10 @@ body.player {
 }
 
 .player .row {
+  width: 70%;
+  margin: 0 auto 2vh auto;
   border: 0.5vh solid #4a6bda;
   border-radius: 2vh;
-  margin-bottom: 2vh;
   padding: 2vh;
   background: #fff;
 }
@@ -34,22 +35,25 @@ body.player {
 }
 
 .player .row-header {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 2vh;
+  justify-content: center;
   margin-bottom: 1vh;
 }
 
 .player .turn-num {
+  position: absolute;
+  left: 0;
   font-size: 8vh;
   font-weight: bold;
-  min-width: 6vh;
 }
 
 .player .name-label {
   font-size: 8vh;
   font-weight: bold;
   text-transform: uppercase;
+  text-align: center;
 }
 
 .player .stat-row {
