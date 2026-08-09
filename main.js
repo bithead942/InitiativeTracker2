@@ -3,13 +3,14 @@ const path = require('path');
 const fs = require('fs');
 
 const dataFile = path.join(app.getPath('userData'), 'initiative-data.json');
+const windows = [];
 
-let mainWindow;
+const gotTheLock = app.requestSingleInstanceLock();
 
-function createWindow() {
+function createWindow(isPlayer = false) {
   Menu.setApplicationMenu(null);
 
-  mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 345,
     height: 600,
     title: 'D&D Initiative Tracker 2.0',
@@ -25,33 +26,61 @@ function createWindow() {
     }
   });
 
-  mainWindow.loadFile('index.html');
+  const loadOptions = isPlayer ? { query: { 'player': '1' } } : {};
+  win.loadFile('index.html', loadOptions);
+  win.on('closed', () => {
+    const idx = windows.indexOf(win);
+    if (idx > -1) windows.splice(idx, 1);
+  });
+  windows.push(win);
+  return win;
 }
 
-app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
-});
-
-ipcMain.handle('load-data', () => {
+function loadData() {
   try {
     const raw = fs.readFileSync(dataFile, 'utf8');
     return JSON.parse(raw);
   } catch {
-    return null;
+    return { characters: [], activeIndex: 0 };
   }
-});
+}
 
-ipcMain.on('save-data-sync', (event, data) => {
+function saveData(data, sender) {
   try {
     fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
+    broadcast('data-changed', sender);
   } catch (err) {
     console.error('Save failed:', err);
   }
-  event.returnValue = true;
-});
+}
+
+function broadcast(channel, sender) {
+  windows.forEach(w => {
+    if (w && !w.isDestroyed() && w.webContents !== sender) w.webContents.send(channel);
+  });
+}
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    const win = createWindow(true);
+    win.focus();
+  });
+
+  app.whenReady().then(createWindow);
+
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+
+  app.on('activate', () => {
+    if (windows.length === 0) createWindow();
+  });
+
+  ipcMain.handle('load-data', loadData);
+  ipcMain.handle('save-data', (event, data) => {
+    saveData(data, event.sender);
+    return true;
+  });
+}

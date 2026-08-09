@@ -17,10 +17,12 @@ const conditions = [
   'Unconscious'
 ];
 
+const isPlayer = new URLSearchParams(window.location.search).get('player') === '1';
+let isDM = !isPlayer;
+
 let state = {
   characters: [],
-  activeIndex: 0,
-  dm: true
+  activeIndex: 0
 };
 
 const listEl = document.getElementById('list');
@@ -44,24 +46,40 @@ function conditionOptions(selected) {
   return conditions.map(c => `<option value="${c}"${c === selected ? ' selected' : ''}>${c}</option>`).join('');
 }
 
+function isDead(char) {
+  return char.condition1 === 'Dead' || char.condition2 === 'Dead';
+}
+
+function getNextAliveIndex(direction) {
+  const n = state.characters.length;
+  if (n === 0) return -1;
+  if (state.characters.every(isDead)) return -1;
+  let i = state.activeIndex;
+  do {
+    i = (i + direction + n) % n;
+    if (!isDead(state.characters[i])) return i;
+  } while (i !== state.activeIndex);
+  return -1;
+}
+
 function render() {
-  document.body.classList.toggle('player', !state.dm);
-  dmCheck.checked = state.dm;
+  document.body.classList.toggle('player', !isDM);
+  dmCheck.checked = isDM;
 
   listEl.innerHTML = '';
   state.characters.forEach((char, index) => {
     const isActive = index === state.activeIndex;
     const showCondition2 = char.condition1 !== 'Normal';
-    const isDead = char.condition1 === 'Dead' || char.condition2 === 'Dead';
+    const dead = isDead(char);
     const row = document.createElement('div');
-    row.className = `row ${isActive ? 'active' : ''} ${isDead ? 'dead' : ''}`;
+    row.className = `row ${isActive ? 'active' : ''} ${dead ? 'dead' : ''}`;
     row.dataset.index = index;
 
     row.innerHTML = `
       <div class="row-header">
         <span class="turn-num">${index + 1}</span>
         <div class="name-wrap">
-          <input type="text" class="name" value="${escapeHtml(char.name)}" maxlength="15" ${state.dm ? '' : 'readonly'} data-field="name">
+          <input type="text" class="name" value="${escapeHtml(char.name)}" maxlength="15" ${isDM ? '' : 'readonly'} data-field="name">
         </div>
         <div class="row-controls dm-only">
           <label class="control-label"><input type="checkbox" class="lock" ${char.locked ? 'checked' : ''} data-field="locked"> Lock</label>
@@ -87,8 +105,8 @@ function render() {
       </div>
       <div class="condition-row">
         <label class="control-label condition-label">Condition:</label>
-        <select class="condition1" data-field="condition1">${conditionOptions(char.condition1)}</select>
-        ${showCondition2 ? `<select class="condition2" data-field="condition2">${conditionOptions(char.condition2)}</select>` : ''}
+        <select class="condition1" data-field="condition1" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition1)}</select>
+        ${showCondition2 ? `<select class="condition2" data-field="condition2" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition2)}</select>` : ''}
       </div>
     `;
     listEl.appendChild(row);
@@ -108,6 +126,14 @@ function scrollToActive() {
   const activeRow = listEl.children[state.activeIndex];
   if (activeRow) {
     activeRow.scrollIntoView({ block: 'center' });
+  }
+}
+
+function saveState() {
+  try {
+    window.api.saveData({ characters: state.characters, activeIndex: state.activeIndex });
+  } catch {
+    // main may not be ready
   }
 }
 
@@ -139,27 +165,21 @@ function updateFromInput(index, field, value) {
     char.locked = value;
   }
   render();
-  // restore focus if possible
-  const row = listEl.querySelector(`.row[data-index="${index}"]`);
-  if (row) {
-    const el = row.querySelector(`[data-field="${field}"]`);
-    if (el) {
-      el.focus();
-      if (el.setSelectionRange) el.setSelectionRange(el.value.length, el.value.length);
-    }
-  }
+  saveState();
 }
 
 function addCharacter() {
   state.characters.push(createCharacter());
   state.activeIndex = Math.min(state.activeIndex, state.characters.length - 1);
   render();
+  saveState();
 }
 
 function deleteCharacter(index) {
   state.characters.splice(index, 1);
   if (state.activeIndex >= state.characters.length) state.activeIndex = Math.max(0, state.characters.length - 1);
   render();
+  saveState();
 }
 
 function moveCharacter(index, direction) {
@@ -169,46 +189,35 @@ function moveCharacter(index, direction) {
   if (state.activeIndex === index) state.activeIndex = newIndex;
   else if (state.activeIndex === newIndex) state.activeIndex = index;
   render();
+  saveState();
 }
 
 function sortInitiative() {
   state.characters.sort((a, b) => b.init - a.init);
   state.activeIndex = 0;
   render();
+  saveState();
 }
 
 function clearUnlocked() {
   state.characters = state.characters.filter(c => c.locked);
   state.activeIndex = 0;
   render();
-}
-
-function isDead(char) {
-  return char.condition1 === 'Dead' || char.condition2 === 'Dead';
-}
-
-function getNextAliveIndex(direction) {
-  const n = state.characters.length;
-  if (n === 0) return -1;
-  if (state.characters.every(isDead)) return -1;
-  let i = state.activeIndex;
-  do {
-    i = (i + direction + n) % n;
-    if (!isDead(state.characters[i])) return i;
-  } while (i !== state.activeIndex);
-  return -1;
+  saveState();
 }
 
 function nextInit() {
   const next = getNextAliveIndex(1);
   if (next !== -1) state.activeIndex = next;
   render();
+  saveState();
 }
 
 function prevInit() {
   const prev = getNextAliveIndex(-1);
   if (prev !== -1) state.activeIndex = prev;
   render();
+  saveState();
 }
 
 function applyDamage(index) {
@@ -225,25 +234,19 @@ function applyDamage(index) {
     char.condition2 = 'Normal';
   }
   render();
-}
-
-function saveState() {
-  try {
-    window.api.saveDataSync(state);
-  } catch {
-    // renderer may not be ready or main unavailable
-  }
+  saveState();
 }
 
 function loadState(data) {
-  if (data && data.characters) {
-    state = { ...state, ...data };
+  if (data) {
+    if (data.characters) state.characters = data.characters;
+    if (typeof data.activeIndex === 'number') state.activeIndex = data.activeIndex;
   }
   render();
 }
 
-// Event delegation
-listEl.addEventListener('input', (e) => {
+// Event delegation for inputs and selects
+listEl.addEventListener('change', (e) => {
   const target = e.target;
   if (!target.dataset.field) return;
   const row = target.closest('.row');
@@ -253,13 +256,11 @@ listEl.addEventListener('input', (e) => {
   updateFromInput(index, target.dataset.field, value);
 });
 
-listEl.addEventListener('change', (e) => {
+// For name: enforce uppercase live as the user types (do not save on every keystroke)
+listEl.addEventListener('input', (e) => {
   const target = e.target;
-  if (target.tagName === 'SELECT' && target.dataset.field) {
-    const row = target.closest('.row');
-    if (!row) return;
-    const index = parseInt(row.dataset.index, 10);
-    updateFromInput(index, target.dataset.field, target.value);
+  if (target.dataset.field === 'name' && target.value) {
+    target.value = target.value.toUpperCase().slice(0, 15);
   }
 });
 
@@ -282,7 +283,7 @@ document.getElementById('nextBtn').addEventListener('click', nextInit);
 document.getElementById('sortBtn').addEventListener('click', sortInitiative);
 document.getElementById('clearBtn').addEventListener('click', clearUnlocked);
 dmCheck.addEventListener('change', (e) => {
-  state.dm = e.target.checked;
+  isDM = e.target.checked;
   render();
 });
 
@@ -293,4 +294,9 @@ window.addEventListener('beforeunload', () => {
 (async function init() {
   const saved = await window.api.loadData();
   loadState(saved);
+
+  window.api.onDataChange(async () => {
+    const saved = await window.api.loadData();
+    loadState(saved);
+  });
 })();
