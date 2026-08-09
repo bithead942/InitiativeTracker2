@@ -94,6 +94,10 @@ html, body {
   width: 38px;
 }
 
+.row input.hp {
+  width: 48px;
+}
+
 .row input.name {
   width: 100%;
 }
