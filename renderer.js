@@ -17,8 +17,7 @@ const conditions = [
   'Unconscious'
 ];
 
-const isPlayer = window.api.isPlayer;
-let isDM = !isPlayer;
+let isDM = true;
 
 let state = {
   characters: [],
@@ -294,9 +293,4 @@ window.addEventListener('beforeunload', () => {
 (async function init() {
   const saved = await window.api.loadData();
   loadState(saved);
-
-  window.api.onDataChange(async () => {
-    const saved = await window.api.loadData();
-    loadState(saved);
-  });
 })();

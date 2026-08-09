@@ -5,9 +5,7 @@ const fs = require('fs');
 const dataFile = path.join(app.getPath('userData'), 'initiative-data.json');
 const windows = [];
 
-const gotTheLock = app.requestSingleInstanceLock();
-
-function createWindow(isPlayer = false) {
+function createWindow(file = 'index.html') {
   Menu.setApplicationMenu(null);
 
   const win = new BrowserWindow({
@@ -22,12 +20,11 @@ function createWindow(isPlayer = false) {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false,
-      additionalArguments: isPlayer ? ['--player-view'] : []
+      nodeIntegration: false
     }
   });
 
-  win.loadFile('index.html');
+  win.loadFile(file);
   win.on('closed', () => {
     const idx = windows.indexOf(win);
     if (idx > -1) windows.splice(idx, 1);
@@ -45,42 +42,32 @@ function loadData() {
   }
 }
 
-function saveData(data, sender) {
+function saveData(data) {
   try {
     fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
-    broadcast('data-changed', sender);
   } catch (err) {
     console.error('Save failed:', err);
   }
 }
 
-function broadcast(channel, sender) {
-  windows.forEach(w => {
-    if (w && !w.isDestroyed() && w.webContents !== sender) w.webContents.send(channel);
-  });
-}
+app.whenReady().then(() => {
+  createWindow('index.html');
+  createWindow('player.html');
+});
 
-if (!gotTheLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    const win = createWindow(true);
-    win.focus();
-  });
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
 
-  app.whenReady().then(createWindow);
+app.on('activate', () => {
+  if (windows.length === 0) {
+    createWindow('index.html');
+    createWindow('player.html');
+  }
+});
 
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-  });
-
-  app.on('activate', () => {
-    if (windows.length === 0) createWindow();
-  });
-
-  ipcMain.handle('load-data', loadData);
-  ipcMain.handle('save-data', (event, data) => {
-    saveData(data, event.sender);
-    return true;
-  });
-}
+ipcMain.handle('load-data', loadData);
+ipcMain.handle('save-data', (event, data) => {
+  saveData(data);
+  return true;
+});
