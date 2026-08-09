@@ -17,6 +17,7 @@ function createWindow() {
     maximizable: false,
     resizable: false,
     useContentSize: true,
+    icon: path.join(__dirname, 'assets', 'app-icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

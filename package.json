@@ -8,25 +8,37 @@
     "dist": "electron-builder",
     "pack": "electron-builder --dir"
   },
-  "keywords": ["dnd", "initiative", "tracker"],
+  "keywords": [
+    "dnd",
+    "initiative",
+    "tracker"
+  ],
   "author": "bithead942",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^31.4.0",
-    "electron-builder": "^24.13.3"
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.bithead942.initiativetracker2",
     "productName": "InitiativeTracker2",
     "win": {
-      "target": "portable"
+      "target": "portable",
+      "icon": "assets/app-icon.ico"
     },
     "files": [
       "main.js",
+      "preload.js",
       "index.html",
       "renderer.js",
       "styles.css",
-      "package.json"
+      "package.json",
+      "assets/**/*",
+      "img/**/*"
     ]
+  },
+  "allowScripts": {
+    "electron@31.7.7": true,
+    "electron-winstaller@5.4.0": true
   }
 }

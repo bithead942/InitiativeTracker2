@@ -52,8 +52,9 @@ function render() {
   state.characters.forEach((char, index) => {
     const isActive = index === state.activeIndex;
     const showCondition2 = char.condition1 !== 'Normal';
+    const isDead = char.condition1 === 'Dead' || char.condition2 === 'Dead';
     const row = document.createElement('div');
-    row.className = `row ${isActive ? 'active' : ''}`;
+    row.className = `row ${isActive ? 'active' : ''} ${isDead ? 'dead' : ''}`;
     row.dataset.index = index;
 
     row.innerHTML = `
@@ -65,13 +66,13 @@ function render() {
         <div class="row-controls dm-only">
           <label class="control-label"><input type="checkbox" class="lock" ${char.locked ? 'checked' : ''} data-field="locked"> Lock</label>
           <button class="icon-btn up dm-only" title="Move Up" data-action="up" aria-label="Move Up">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+            <img src="img/UpArrow.jpg" alt="Up" class="btn-img">
           </button>
           <button class="icon-btn down dm-only" title="Move Down" data-action="down" aria-label="Move Down">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20l8-8h-5v-8h-6v8h-5z"/></svg>
+            <img src="img/DownArrow.jpg" alt="Down" class="btn-img">
           </button>
           <button class="icon-btn delete dm-only" title="Delete" data-action="delete" aria-label="Delete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M5 6v14a2 2 0 002 2h10a2 2 0 002-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M10 11v6M14 11v6"/></svg>
+            <img src="img/Delete.jpg" alt="Delete" class="btn-img">
           </button>
         </div>
       </div>
@@ -85,6 +86,7 @@ function render() {
         </div>
       </div>
       <div class="condition-row">
+        <label class="control-label condition-label">Condition:</label>
         <select class="condition1" data-field="condition1">${conditionOptions(char.condition1)}</select>
         ${showCondition2 ? `<select class="condition2" data-field="condition2">${conditionOptions(char.condition2)}</select>` : ''}
       </div>
@@ -119,6 +121,9 @@ function updateFromInput(index, field, value) {
     if (field === 'init') {
       if (char.init > 99) char.init = 99;
       if (char.init < 0) char.init = 0;
+    } else if (field === 'hp' && char.hp === 0) {
+      char.condition1 = 'Dead';
+      char.condition2 = 'Normal';
     }
   } else if (field === 'damage') {
     const num = parseInt(value, 10);
@@ -178,15 +183,31 @@ function clearUnlocked() {
   render();
 }
 
+function isDead(char) {
+  return char.condition1 === 'Dead' || char.condition2 === 'Dead';
+}
+
+function getNextAliveIndex(direction) {
+  const n = state.characters.length;
+  if (n === 0) return -1;
+  if (state.characters.every(isDead)) return -1;
+  let i = state.activeIndex;
+  do {
+    i = (i + direction + n) % n;
+    if (!isDead(state.characters[i])) return i;
+  } while (i !== state.activeIndex);
+  return -1;
+}
+
 function nextInit() {
-  if (state.characters.length === 0) return;
-  state.activeIndex = (state.activeIndex + 1) % state.characters.length;
+  const next = getNextAliveIndex(1);
+  if (next !== -1) state.activeIndex = next;
   render();
 }
 
 function prevInit() {
-  if (state.characters.length === 0) return;
-  state.activeIndex = (state.activeIndex - 1 + state.characters.length) % state.characters.length;
+  const prev = getNextAliveIndex(-1);
+  if (prev !== -1) state.activeIndex = prev;
   render();
 }
 
@@ -195,8 +216,14 @@ function applyDamage(index) {
   const damage = parseInt(char.damage, 10);
   if (isNaN(damage) || damage === 0) return;
   const hp = parseInt(char.hp, 10) || 0;
-  char.hp = hp - damage;
+  let newHp = hp - damage;
+  if (newHp < 0) newHp = 0;
+  char.hp = newHp;
   char.damage = '';
+  if (newHp === 0) {
+    char.condition1 = 'Dead';
+    char.condition2 = 'Normal';
+  }
   render();
 }
 
