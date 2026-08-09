@@ -50,24 +50,35 @@ function saveData(data) {
   }
 }
 
-app.whenReady().then(() => {
-  createWindow('index.html');
-  createWindow('player.html');
-});
+const gotTheLock = app.requestSingleInstanceLock();
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    const win = windows.find(w => w && !w.isDestroyed());
+    if (win) win.focus();
+  });
 
-app.on('activate', () => {
-  if (windows.length === 0) {
+  app.whenReady().then(() => {
     createWindow('index.html');
     createWindow('player.html');
-  }
-});
+  });
 
-ipcMain.handle('load-data', loadData);
-ipcMain.handle('save-data', (event, data) => {
-  saveData(data);
-  return true;
-});
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+  });
+
+  app.on('activate', () => {
+    if (windows.length === 0) {
+      createWindow('index.html');
+      createWindow('player.html');
+    }
+  });
+
+  ipcMain.handle('load-data', loadData);
+  ipcMain.handle('save-data', (event, data) => {
+    saveData(data);
+    return true;
+  });
+}
