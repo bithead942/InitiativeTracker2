@@ -25,7 +25,6 @@ let state = {
 };
 
 const listEl = document.getElementById('list');
-const dmCheck = document.getElementById('dmCheck');
 
 function createCharacter() {
   return {
@@ -62,9 +61,6 @@ function getNextAliveIndex(direction) {
 }
 
 function render() {
-  document.body.classList.toggle('player', !isDM);
-  dmCheck.checked = isDM;
-
   listEl.innerHTML = '';
   state.characters.forEach((char, index) => {
     const isActive = index === state.activeIndex;
@@ -300,10 +296,6 @@ document.getElementById('prevBtn').addEventListener('click', prevInit);
 document.getElementById('nextBtn').addEventListener('click', nextInit);
 document.getElementById('sortBtn').addEventListener('click', sortInitiative);
 document.getElementById('clearBtn').addEventListener('click', clearUnlocked);
-dmCheck.addEventListener('change', (e) => {
-  isDM = e.target.checked;
-  render();
-});
 
 window.addEventListener('beforeunload', () => {
   saveState();
