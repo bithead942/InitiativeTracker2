@@ -72,6 +72,8 @@ function render() {
     const dead = isDead(char);
     const row = document.createElement('div');
     row.className = `row ${isActive ? 'active' : ''} ${dead ? 'dead' : ''}`;
+    row.draggable = true;
+    row.title = 'Drag to reorder';
     row.dataset.index = index;
 
     row.innerHTML = `
@@ -82,12 +84,6 @@ function render() {
         </div>
         <div class="row-controls dm-only">
           <label class="control-label"><input type="checkbox" class="lock" ${char.locked ? 'checked' : ''} data-field="locked"> Lock</label>
-          <button class="icon-btn up dm-only" title="Move Up" data-action="up" aria-label="Move Up">
-            <img src="img/UpArrow.jpg" alt="Up" class="btn-img">
-          </button>
-          <button class="icon-btn down dm-only" title="Move Down" data-action="down" aria-label="Move Down">
-            <img src="img/DownArrow.jpg" alt="Down" class="btn-img">
-          </button>
           <button class="icon-btn delete dm-only" title="Delete" data-action="delete" aria-label="Delete">
             <img src="img/Delete.jpg" alt="Delete" class="btn-img">
           </button>
@@ -183,16 +179,6 @@ function deleteCharacter(index) {
   saveState();
 }
 
-function moveCharacter(index, direction) {
-  const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= state.characters.length) return;
-  [state.characters[index], state.characters[newIndex]] = [state.characters[newIndex], state.characters[index]];
-  if (state.activeIndex === index) state.activeIndex = newIndex;
-  else if (state.activeIndex === newIndex) state.activeIndex = index;
-  render();
-  saveState();
-}
-
 function sortInitiative() {
   state.characters.sort((a, b) => b.init - a.init);
   state.activeIndex = 0;
@@ -273,9 +259,40 @@ listEl.addEventListener('click', (e) => {
   const index = parseInt(row.dataset.index, 10);
   const action = btn.dataset.action;
   if (action === 'delete') deleteCharacter(index);
-  else if (action === 'up') moveCharacter(index, -1);
-  else if (action === 'down') moveCharacter(index, 1);
   else if (action === 'damage') applyDamage(index);
+});
+
+listEl.addEventListener('dragstart', (e) => {
+  const row = e.target.closest('.row');
+  if (!row) return;
+  e.dataTransfer.setData('text/plain', row.dataset.index);
+  e.dataTransfer.effectAllowed = 'move';
+  row.classList.add('dragging');
+});
+
+listEl.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+});
+
+listEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const targetRow = e.target.closest('.row');
+  if (!targetRow) return;
+  const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+  const toIndex = parseInt(targetRow.dataset.index, 10);
+  if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+  const activeId = state.characters[state.activeIndex]?.id;
+  const [char] = state.characters.splice(fromIndex, 1);
+  state.characters.splice(toIndex, 0, char);
+  state.activeIndex = activeId ? state.characters.findIndex(c => c.id === activeId) : 0;
+  render();
+  saveState();
+});
+
+listEl.addEventListener('dragend', (e) => {
+  const row = e.target.closest('.row');
+  if (row) row.classList.remove('dragging');
 });
 
 document.getElementById('addBtn').addEventListener('click', addCharacter);
