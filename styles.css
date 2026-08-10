@@ -215,7 +215,8 @@ input[type=number] {
   display: none;
 }
 
-.condition-row {
+.condition-row,
+.size-row {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -224,4 +225,8 @@ input[type=number] {
 
 .condition-label {
   font-size: 12px;
+}
+
+.row select.size {
+  width: 95px;
 }

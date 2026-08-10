@@ -17,6 +17,8 @@ const conditions = [
   'Unconscious'
 ];
 
+const sizes = ['Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan'];
+
 let isDM = true;
 
 let state = {
@@ -30,6 +32,7 @@ function createCharacter() {
   return {
     id: Date.now() + Math.random(),
     name: 'NEW',
+    size: 'Medium',
     init: 0,
     ac: '',
     hp: '',
@@ -42,6 +45,10 @@ function createCharacter() {
 
 function conditionOptions(selected) {
   return conditions.map(c => `<option value="${c}"${c === selected ? ' selected' : ''}>${c}</option>`).join('');
+}
+
+function sizeOptions(selected) {
+  return sizes.map(s => `<option value="${s}"${s === selected ? ' selected' : ''}>${s}</option>`).join('');
 }
 
 function isDead(char) {
@@ -99,6 +106,9 @@ function render() {
         <select class="condition1" data-field="condition1" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition1)}</select>
         ${showCondition2 ? `<select class="condition2" data-field="condition2" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition2)}</select>` : ''}
       </div>
+      <div class="size-row">
+        <label class="control-label">Size: <select class="size" data-field="size" ${isDM ? '' : 'disabled'}>${sizeOptions(char.size)}</select></label>
+      </div>
     `;
     listEl.appendChild(row);
   });
@@ -152,6 +162,8 @@ function updateFromInput(index, field, value) {
     }
   } else if (field === 'condition2') {
     char.condition2 = value;
+  } else if (field === 'size') {
+    char.size = value;
   } else if (field === 'locked') {
     char.locked = value;
   }
