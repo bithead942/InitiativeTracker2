@@ -10,7 +10,7 @@ function createWindow(file = 'index.html', isPlayer = false) {
   Menu.setApplicationMenu(null);
 
   const win = new BrowserWindow({
-    width: 500,
+    width: 450,
     height: 650,
     title: 'D&D Initiative Tracker 2.0',
     minimizable: false,
