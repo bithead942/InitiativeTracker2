@@ -25,7 +25,7 @@
     "win": {
       "target": "portable",
       "icon": "assets/app-icon.ico",
-      "signAndEditExecutable": false,
+      "signExecutable": false,
       "verifyUpdateCodeSignature": false
     },
     "files": [
