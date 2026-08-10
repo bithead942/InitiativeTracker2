@@ -39,6 +39,7 @@ function createCharacter() {
     damage: '',
     condition1: 'Normal',
     condition2: 'Normal',
+    hidden: false,
     locked: false
   };
 }
@@ -86,6 +87,7 @@ function render() {
           <input type="text" class="name" value="${escapeHtml(char.name)}" maxlength="15" ${isDM ? '' : 'readonly'} data-field="name">
         </div>
         <div class="row-controls dm-only">
+          <label class="control-label"><input type="checkbox" class="hide" ${char.hidden ? 'checked' : ''} data-field="hidden"> Hide</label>
           <label class="control-label"><input type="checkbox" class="lock" ${char.locked ? 'checked' : ''} data-field="locked"> Lock</label>
           <button class="icon-btn delete dm-only" title="Delete" data-action="delete" aria-label="Delete">
             <img src="img/Delete.jpg" alt="Delete" class="btn-img">
@@ -164,6 +166,8 @@ function updateFromInput(index, field, value) {
     char.condition2 = value;
   } else if (field === 'size') {
     char.size = value;
+  } else if (field === 'hidden') {
+    char.hidden = value;
   } else if (field === 'locked') {
     char.locked = value;
   }

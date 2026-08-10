@@ -16,8 +16,7 @@ function escapeHtml(text) {
 }
 
 function scrollToActive() {
-  if (state.activeIndex < 0 || state.activeIndex >= state.characters.length) return;
-  const activeRow = listEl.children[state.activeIndex];
+  const activeRow = listEl.querySelector(`.row[data-index="${state.activeIndex}"]`);
   if (activeRow) {
     activeRow.scrollIntoView({ block: 'center' });
   }
@@ -34,10 +33,12 @@ function conditionText(char) {
 function render() {
   listEl.innerHTML = '';
   state.characters.forEach((char, index) => {
+    if (char.hidden) return;
     const isActive = index === state.activeIndex;
     const dead = isDead(char);
     const row = document.createElement('div');
     row.className = `row ${isActive ? 'active' : ''} ${dead ? 'dead' : ''}`;
+    row.dataset.index = index;
 
     row.innerHTML = `
       <div class="row-header">
