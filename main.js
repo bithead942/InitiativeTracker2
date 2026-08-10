@@ -11,7 +11,7 @@ function createWindow(file = 'index.html', isPlayer = false) {
 
   const win = new BrowserWindow({
     width: 345,
-    height: 600,
+    height: 650,
     title: 'D&D Initiative Tracker 2.0',
     minimizable: false,
     maximizable: false,
