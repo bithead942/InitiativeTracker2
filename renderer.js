@@ -155,6 +155,7 @@ function updateFromInput(index, field, value) {
   } else if (field === 'damage') {
     const num = parseInt(value, 10);
     char.damage = isNaN(num) ? '' : num;
+    return;
   } else if (field === 'condition1') {
     char.condition1 = value;
     if (char.condition1 === 'Normal') {
