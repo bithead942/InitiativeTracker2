@@ -79,3 +79,11 @@ body.player {
 .player .condition-value {
   font-weight: bold;
 }
+
+.bloodied-icon {
+  position: absolute;
+  bottom: 1vh;
+  right: 1vh;
+  width: 4vh;
+  height: 4vh;
+}

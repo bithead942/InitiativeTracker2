@@ -9,6 +9,11 @@ function isDead(char) {
   return char.condition1 === 'Dead' || char.condition2 === 'Dead';
 }
 
+function isBloodied(char) {
+  const hp = parseInt(char.hp, 10);
+  return !isNaN(hp) && hp <= 10;
+}
+
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
@@ -50,6 +55,7 @@ function render() {
         <span class="stat-label condition-label">Condition: <span class="condition-value">${conditionText(char)}</span></span>
         ${!char.locked ? `<span class="stat-label size-label">Size: <span class="stat-value">${char.size || ''}</span></span>` : ''}
       </div>
+      ${isBloodied(char) ? `<img src="img/bloodied.png" class="bloodied-icon" alt="Bloodied">` : ''}
     `;
     listEl.appendChild(row);
   });
