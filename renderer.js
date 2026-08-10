@@ -196,6 +196,10 @@ function sortInitiative() {
 }
 
 function clearUnlocked() {
+  state.characters.forEach(c => {
+    c.condition1 = 'Normal';
+    c.condition2 = 'Normal';
+  });
   state.characters = state.characters.filter(c => c.locked);
   state.activeIndex = 0;
   render();
