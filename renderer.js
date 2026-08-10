@@ -107,9 +107,7 @@ function render() {
         <label class="control-label condition-label">Condition:</label>
         <select class="condition1" data-field="condition1" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition1)}</select>
         ${showCondition2 ? `<select class="condition2" data-field="condition2" ${isDM ? '' : 'disabled'}>${conditionOptions(char.condition2)}</select>` : ''}
-      </div>
-      <div class="size-row">
-        <label class="control-label">Size: <select class="size" data-field="size" ${isDM ? '' : 'disabled'}>${sizeOptions(char.size)}</select></label>
+        <label class="control-label size-label">Size: <select class="size" data-field="size" ${isDM ? '' : 'disabled'}>${sizeOptions(char.size)}</select></label>
       </div>
     `;
     listEl.appendChild(row);
