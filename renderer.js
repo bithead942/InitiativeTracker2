@@ -33,7 +33,7 @@ function createCharacter() {
     id: Date.now() + Math.random(),
     name: 'NEW',
     size: 'Medium',
-    init: 0,
+    init: Math.floor(Math.random() * 20) + 1,
     ac: '',
     hp: '',
     damage: '',
