@@ -18,24 +18,24 @@ body.player {
 .player .list {
   flex: 1;
   overflow-y: auto;
-  padding: 2vh;
+  padding: 1vh;
 }
 
 .player .row {
   width: 70%;
-  margin: 0 auto 2vh auto;
+  margin: 0 auto 1vh auto;
   border: 0.5vh solid #4a6bda;
   border-radius: 2vh;
-  padding: 2vh;
-  background: rgba(255, 255, 255, 0.5);
+  padding: 1vh;
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .player .row.active {
-  background: rgba(255, 255, 0, 0.5);
+  background: rgba(255, 255, 0, 0.75);
 }
 
 .player .row.dead {
-  background: rgba(160, 160, 160, 0.5);
+  background: rgba(160, 160, 160, 0.75);
 }
 
 .player .row-header {
@@ -43,18 +43,18 @@ body.player {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1vh;
+  margin-bottom: 0.5vh;
 }
 
 .player .turn-num {
   position: absolute;
   left: 0;
-  font-size: 8vh;
+  font-size: 5vh;
   font-weight: bold;
 }
 
 .player .name-label {
-  font-size: 8vh;
+  font-size: 5vh;
   font-weight: bold;
   text-transform: uppercase;
   text-align: center;
@@ -63,13 +63,13 @@ body.player {
 .player .stat-row {
   display: flex;
   align-items: center;
-  gap: 4vh;
+  gap: 2vh;
   flex-wrap: wrap;
-  margin-top: 1vh;
+  margin-top: 0.5vh;
 }
 
 .player .stat-label {
-  font-size: 5vh;
+  font-size: 3vh;
 }
 
 .player .stat-value {
