@@ -88,12 +88,10 @@ function render() {
       <div class="stat-row">
         <label class="control-label">Init: <input type="number" class="init" min="1" max="99" value="${char.init}" data-field="init"></label>
         <label class="control-label dm-only">AC: <input type="number" class="ac" value="${char.ac}" data-field="ac"></label>
-        <div class="dm-right dm-only">
-          <label class="control-label">HP: <input type="number" class="hp" value="${char.hp}" data-field="hp"></label>
-          <div class="dmg-row">
-            <input type="number" class="damage" value="${char.damage}" data-field="damage">
-            <button class="dmg-btn" data-action="damage" title="Subtract">-</button>
-          </div>
+        <label class="control-label dm-only">HP: <input type="number" class="hp" value="${char.hp}" data-field="hp"></label>
+        <div class="dmg-row dm-only">
+          <input type="number" class="damage" value="${char.damage}" data-field="damage">
+          <button class="dmg-btn dm-only" data-action="damage" title="Subtract">-</button>
         </div>
       </div>
       <div class="condition-row">
