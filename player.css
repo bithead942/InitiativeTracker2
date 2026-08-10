@@ -86,4 +86,5 @@ body.player {
   right: 1vh;
   width: 4vh;
   height: 4vh;
+  object-fit: contain;
 }
