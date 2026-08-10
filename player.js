@@ -47,6 +47,7 @@ function render() {
       <div class="stat-row">
         <span class="stat-label">Init: <span class="stat-value">${char.init}</span></span>
         <span class="stat-label condition-label">Condition: <span class="condition-value">${conditionText(char)}</span></span>
+        ${!char.locked ? `<span class="stat-label size-label">Size: <span class="stat-value">${char.size || ''}</span></span>` : ''}
       </div>
     `;
     listEl.appendChild(row);
